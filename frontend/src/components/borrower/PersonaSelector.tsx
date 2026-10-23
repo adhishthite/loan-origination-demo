@@ -13,6 +13,10 @@ export function PersonaSelector({
   activePersonaId,
   onSelectPersona,
 }: PersonaSelectorProps) {
+  if (!personas || !Array.isArray(personas) || personas.length === 0) {
+    return null;
+  }
+
   return (
     <div className="mb-6">
       <div className="mb-3 flex items-center justify-between">
@@ -31,10 +35,32 @@ export function PersonaSelector({
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {personas.map((persona) => {
+        {personas.map((persona: any) => {
           const isSelected = persona.id === activePersonaId;
-          const isStp = persona.badgeColor === "emerald";
-          const isCounter = persona.badgeColor === "amber";
+          const badgeColor =
+            persona.badgeColor ||
+            (persona.badge_variant === "success"
+              ? "emerald"
+              : persona.badge_variant === "warning"
+                ? "amber"
+                : "rose");
+          const isStp = badgeColor === "emerald";
+          const isCounter = badgeColor === "amber";
+
+          const amount =
+            persona.loanRequest?.amount ??
+            persona.loan_request?.amount ??
+            1000000;
+          const tenure =
+            persona.loanRequest?.tenureMonths ??
+            persona.loan_request?.tenure_months ??
+            36;
+          const pan =
+            persona.applicant?.taxId ??
+            persona.applicant?.tax_id ??
+            "ABCDE1234F";
+          const title = persona.title || persona.subtitle || "";
+          const summary = persona.summary || persona.description || "";
 
           return (
             <button
@@ -68,7 +94,7 @@ export function PersonaSelector({
                 </span>
 
                 <span className="text-xs font-semibold text-[var(--text-primary)]">
-                  {formatINRLakh(persona.loanRequest.amount)}
+                  {formatINRLakh(amount)}
                 </span>
               </div>
 
@@ -77,16 +103,16 @@ export function PersonaSelector({
               </div>
 
               <div className="mt-0.5 text-xs font-medium text-[var(--text-muted)]">
-                {persona.title}
+                {title}
               </div>
 
               <p className="mt-2 text-[11px] leading-relaxed text-[var(--text-faint)]">
-                {persona.summary}
+                {summary}
               </p>
 
               <div className="mt-3 flex items-center justify-between border-t border-[var(--border-subtle)] pt-2 text-[11px] text-[var(--text-muted)]">
-                <span>Tenure: {persona.loanRequest.tenureMonths}m</span>
-                <span>PAN: {persona.applicant.taxId}</span>
+                <span>Tenure: {tenure}m</span>
+                <span>PAN: {pan}</span>
               </div>
             </button>
           );
