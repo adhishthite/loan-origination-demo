@@ -20,6 +20,31 @@ const localApplications: Record<string, LoanApplication> = {
   ...MOCK_APPLICATIONS,
 };
 
+// Shallow snake_case -> camelCase. Shallow on purpose: A2A request/response
+// payloads are JSON-RPC wire data and must be shown exactly as sent.
+function camelizeShallow<T>(obj: unknown): T | undefined {
+  if (!obj || typeof obj !== "object") return undefined;
+  return Object.fromEntries(
+    Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
+      k.replace(/_([a-z0-9])/g, (_, c: string) => c.toUpperCase()),
+      v,
+    ]),
+  ) as T;
+}
+
+function normalizeBureau(raw: unknown): LoanApplication["bureauReport"] {
+  const b = camelizeShallow<Record<string, any>>(raw);
+  if (!b) return undefined;
+  return {
+    bureauScore: b.bureauScore,
+    activeTradelines: b.activeTradelines ?? 0,
+    dpd30To60In24m: b.dpd30To60In24m ?? b.dpd306024m ?? 0,
+    dpd90PlusIn24m: b.dpd90PlusIn24m ?? b.dpd90Plus24m ?? 0,
+    recentInquiries6m: b.recentInquiries6m ?? 0,
+    bureauProvider: b.bureauProvider ?? "Credit bureau (via A2A)",
+  };
+}
+
 function normalizeApplication(raw: any): LoanApplication {
   if (!raw) return MOCK_APPLICATIONS["app-grey-002"];
 
@@ -191,22 +216,28 @@ function normalizeApplication(raw: any): LoanApplication {
 
   return {
     id,
+    personaId: raw.personaId ?? raw.persona_id,
     status,
     createdAt,
     updatedAt,
     applicant,
     loanRequest,
     documentsUploaded,
-    documentExtraction: raw.documentExtraction || raw.document_extraction,
-    kycVerification: raw.kycVerification || raw.kyc_result,
-    bureauReport: raw.bureauReport || raw.bureau_report,
+    documentExtraction:
+      raw.documentExtraction ?? camelizeShallow(raw.document_extraction),
+    kycVerification: raw.kycVerification ?? camelizeShallow(raw.kyc_result),
+    bureauReport: raw.bureauReport ?? normalizeBureau(raw.bureau_report),
     metrics,
     policyRules,
     cam,
     counterOffer,
     kfs,
-    adkExecutionSteps: raw.adkExecutionSteps || raw.agent_steps || [],
-    a2aTelemetry: raw.a2aTelemetry || raw.a2a_telemetry || [],
+    adkExecutionSteps:
+      raw.adkExecutionSteps ??
+      (raw.agent_steps ?? []).map((s: unknown) => camelizeShallow(s)),
+    a2aTelemetry:
+      raw.a2aTelemetry ??
+      (raw.a2a_telemetry ?? []).map((r: unknown) => camelizeShallow(r)),
     auditLog,
   };
 }
@@ -238,11 +269,55 @@ async function safeFetch<T>(
 
 export const losApi = {
   async getPersonas(): Promise<DemoPersonaPreset[]> {
-    return safeFetch<DemoPersonaPreset[]>(
+    const raw = await safeFetch<unknown[]>(
       `${API_BASE}/api/v1/personas`,
       { method: "GET" },
       () => DEMO_PERSONAS,
     );
+    if (!Array.isArray(raw) || raw.length === 0) return DEMO_PERSONAS;
+    // Backend returns snake_case + badge_variant; local mocks are camelCase.
+    // Merge onto the local preset so the UI always sees one consistent shape.
+    return raw.map((item) => {
+      const p = item as Record<string, any>;
+      const local = DEMO_PERSONAS.find((d) => d.id === p.id);
+      const variant = p.badge_variant as string | undefined;
+      const badgeColor: DemoPersonaPreset["badgeColor"] =
+        p.badgeColor ??
+        (variant === "success"
+          ? "emerald"
+          : variant === "warning"
+            ? "amber"
+            : variant === "destructive"
+              ? "rose"
+              : (local?.badgeColor ?? "amber"));
+      return {
+        ...(local ?? DEMO_PERSONAS[1]),
+        id: p.id,
+        name: p.name ?? local?.name,
+        title: p.title ?? p.subtitle ?? local?.title ?? "",
+        summary: p.summary ?? p.description ?? local?.summary ?? "",
+        badge: p.badge ?? local?.badge ?? "",
+        badgeColor,
+        expectedOutcome:
+          p.expectedOutcome ?? p.expected_outcome ?? local?.expectedOutcome,
+        applicant: p.applicant?.full_name
+          ? {
+              fullName: p.applicant.full_name,
+              dob: p.applicant.dob,
+              taxId: p.applicant.tax_id,
+              employmentType: p.applicant.employment_type,
+              declaredMonthlyIncome: p.applicant.declared_monthly_income,
+            }
+          : (p.applicant ?? local?.applicant),
+        loanRequest: p.loan_request
+          ? {
+              amount: p.loan_request.amount,
+              tenureMonths: p.loan_request.tenure_months,
+              purpose: p.loan_request.purpose,
+            }
+          : (p.loanRequest ?? local?.loanRequest),
+      } as DemoPersonaPreset;
+    });
   },
 
   async getApplications(): Promise<LoanApplication[]> {

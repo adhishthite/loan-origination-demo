@@ -27,6 +27,7 @@ from app.models.domain import (
     StoredDocument,
 )
 from app.services.financial_calculator import (
+    _inr,
     compute_foir,
     compute_interest_rate_tier,
     compute_monthly_emi,
@@ -294,8 +295,8 @@ class LosOrchestratorService:
         )
 
         summary = (
-            f"Revised terms of ₹{req.proposed_amount:,.0f} at {req.proposed_tenure_months} months: "
-            f"Proposed EMI ₹{new_emi:,.0f}/mo yields FOIR of {new_foir:.2f}% "
+            f"Revised terms of {_inr(req.proposed_amount)} at {req.proposed_tenure_months} months: "
+            f"Proposed EMI {_inr(new_emi)}/mo yields FOIR of {new_foir:.2f}% "
             f"({'Viable - within sustainable debt threshold' if is_viable else 'High Risk - exceeds policy guidelines'})."
         )
 

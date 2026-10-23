@@ -13,13 +13,13 @@ from app.models.domain import (
 
 PERSONA_STP_CLEAN = DemoPersonaPreset(
     id="persona_stp_clean",
-    name="Ananya Kulkarni",
+    name="Priya Raghavan",
     subtitle="Salaried Senior Tech Lead • Clean STP Track",
     badge="AUTO-APPROVE (STP)",
     badge_variant="success",
     description="Tier-1 salaried professional with excellent credit (792), zero bounces, low FOIR (18%), and matching KYC.",
     applicant=ApplicantProfile(
-        full_name="Ananya Kulkarni",
+        full_name="Priya Raghavan",
         dob=date(1994, 6, 12),  # Age 32
         tax_id="ABCDE1234F",
         employment_type=EmploymentType.SALARIED,
@@ -35,19 +35,19 @@ PERSONA_STP_CLEAN = DemoPersonaPreset(
     document_bundle=[
         DocumentUploadItem(
             doc_type="ID_PROOF",
-            file_name="Ananya_Kulkarni_PAN_Card.pdf",
+            file_name="Priya_Raghavan_PAN_Card.pdf",
             mime_type="application/pdf",
-            content_summary="Income Tax Department PAN Card. Name: Ananya Kulkarni, DOB: 12/06/1994, PAN: ABCDE1234F. Clear, tamper-free.",
+            content_summary="Income Tax Department PAN Card. Name: Priya Raghavan, DOB: 12/06/1994, PAN: ABCDE1234F. Clear, tamper-free.",
         ),
         DocumentUploadItem(
             doc_type="SALARY_SLIP",
-            file_name="Ananya_SalarySlips_Q3_2026.pdf",
+            file_name="Priya_SalarySlips_Q3_2026.pdf",
             mime_type="application/pdf",
             content_summary="Net Pay: ₹1,45,000/month. Employer: Alphabet India Pvt Ltd. Direct credit to HDFC Bank.",
         ),
         DocumentUploadItem(
             doc_type="BANK_STATEMENT",
-            file_name="Ananya_HDFC_Statement_6M.pdf",
+            file_name="Priya_HDFC_Statement_6M.pdf",
             mime_type="application/pdf",
             content_summary="6 Months Salary Account Statement. Average Monthly Balance: ₹85,000. Inward bounces: 0. Existing EMI debits: ₹0.",
         ),
@@ -56,13 +56,13 @@ PERSONA_STP_CLEAN = DemoPersonaPreset(
 
 PERSONA_GREY_COUNTER = DemoPersonaPreset(
     id="persona_grey_counter",
-    name="Rohan Deshmukh",
+    name="Arjun Malhotra",
     subtitle="Salaried Marketing Lead • Canonical Grey-Zone",
     badge="MANUAL REVIEW + COUNTER-OFFER",
     badge_variant="warning",
     description="Solid profile (Bureau 732, 0 DPD, 0 bounces), but high requested amount (₹15L) pushes FOIR to 59%, triggering AI Counter-Offer.",
     applicant=ApplicantProfile(
-        full_name="Rohan Deshmukh",
+        full_name="Arjun Malhotra",
         dob=date(1991, 4, 15),  # Age 35
         tax_id="ABCDE5678G",
         employment_type=EmploymentType.SALARIED,
@@ -78,19 +78,19 @@ PERSONA_GREY_COUNTER = DemoPersonaPreset(
     document_bundle=[
         DocumentUploadItem(
             doc_type="ID_PROOF",
-            file_name="Rohan_Deshmukh_PAN.pdf",
+            file_name="Arjun_Malhotra_PAN.pdf",
             mime_type="application/pdf",
-            content_summary="Income Tax Department PAN Card. Name: Rohan Deshmukh, DOB: 15/04/1991, PAN: ABCDE5678G.",
+            content_summary="Income Tax Department PAN Card. Name: Arjun Malhotra, DOB: 15/04/1991, PAN: ABCDE5678G.",
         ),
         DocumentUploadItem(
             doc_type="SALARY_SLIP",
-            file_name="Rohan_Salary_Slips_Recent.pdf",
+            file_name="Arjun_Salary_Slips_Recent.pdf",
             mime_type="application/pdf",
             content_summary="Net Pay: ₹1,15,000/month. Employer: FinTech Media Solutions. Minor variance of 4.2% vs declared ₹1,20,000.",
         ),
         DocumentUploadItem(
             doc_type="BANK_STATEMENT",
-            file_name="Rohan_ICICI_Statement_6M.pdf",
+            file_name="Arjun_ICICI_Statement_6M.pdf",
             mime_type="application/pdf",
             content_summary="6 Months ICICI Bank Statement. AMB: ₹52,000. Existing auto loan EMI: ₹18,000/month. Inward bounces: 0.",
         ),
@@ -99,13 +99,13 @@ PERSONA_GREY_COUNTER = DemoPersonaPreset(
 
 PERSONA_REJECT_KNOCKOUT = DemoPersonaPreset(
     id="persona_reject_knockout",
-    name="Vikramaditya Joshi",
+    name="Sourav Banerjee",
     subtitle="Self-Employed SME Owner • Hard Knockouts",
     badge="AUTO-REJECT (KNOCKOUT)",
     badge_variant="destructive",
     description="Multiple policy knockout breaches: low credit score (615), 2 severe 90+ DPD delinquencies, 3 check bounces, and 45% income inflation.",
     applicant=ApplicantProfile(
-        full_name="Vikramaditya Joshi",
+        full_name="Sourav Banerjee",
         dob=date(1985, 2, 10),  # Age 41
         tax_id="ABCDE9012H",
         employment_type=EmploymentType.SELF_EMPLOYED,
@@ -121,19 +121,19 @@ PERSONA_REJECT_KNOCKOUT = DemoPersonaPreset(
     document_bundle=[
         DocumentUploadItem(
             doc_type="ID_PROOF",
-            file_name="Vikram_Joshi_PAN_Card.pdf",
+            file_name="Sourav_Banerjee_PAN_Card.pdf",
             mime_type="application/pdf",
-            content_summary="PAN Card: Vikramaditya Joshi, DOB: 10/02/1985, PAN: ABCDE9012H.",
+            content_summary="PAN Card: Sourav Banerjee, DOB: 10/02/1985, PAN: ABCDE9012H.",
         ),
         DocumentUploadItem(
             doc_type="SALARY_SLIP",
-            file_name="Vikram_ITR_GST_Filings.pdf",
+            file_name="Sourav_ITR_GST_Filings.pdf",
             mime_type="application/pdf",
             content_summary="ITR & GST returns verify monthly cashflow of ₹1,10,000 (declared ₹2,00,000 - 45% variance!).",
         ),
         DocumentUploadItem(
             doc_type="BANK_STATEMENT",
-            file_name="Vikram_CurrentAccount_6M.pdf",
+            file_name="Sourav_CurrentAccount_6M.pdf",
             mime_type="application/pdf",
             content_summary="Current Account Statement: AMB: ₹12,000. 3 inward check bounces in last 6 months. Existing equipment EMI: ₹45,000/month.",
         ),

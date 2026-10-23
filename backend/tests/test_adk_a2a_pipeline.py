@@ -13,7 +13,7 @@ class TestA2aProtocol:
     async def test_bureau_a2a_execution_and_telemetry(self):
         bureau_report, watchlist_hit, exchange = await execute_bureau_a2a_call(
             tax_id="ABCDE1234F",
-            applicant_name="Ananya Kulkarni",
+            applicant_name="Priya Raghavan",
         )
         assert bureau_report.bureau_score == 792
         assert bureau_report.dpd_90_plus_24m == 0

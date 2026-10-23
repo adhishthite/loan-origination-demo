@@ -7,6 +7,21 @@ income variance, Key Fact Statement (KFS), and Counter-Offer optimization.
 from app.models.domain import CounterOffer, KeyFactStatement
 
 
+def _inr(amount: float) -> str:
+    """Format rupees with Indian digit grouping, e.g. 1500000 -> ₹15,00,000."""
+    n = str(int(round(amount)))
+    if len(n) <= 3:
+        return f"₹{n}"
+    head, tail = n[:-3], n[-3:]
+    groups = []
+    while len(head) > 2:
+        groups.insert(0, head[-2:])
+        head = head[:-2]
+    if head:
+        groups.insert(0, head)
+    return f"₹{','.join(groups)},{tail}"
+
+
 def compute_interest_rate_tier(bureau_score: int) -> float:
     """Computes the risk-based APR tier based on Credit Bureau Score.
 
@@ -160,11 +175,17 @@ def compute_counter_offer(
             p -= 25_000
 
     if best_candidate:
+        breach = (
+            "above the 55% policy cap"
+            if current_foir > 55.0
+            else "above the 45% straight-through limit"
+        )
         rationale = (
-            f"Requested loan of ₹{requested_amount:,.0f} at {requested_tenure} months resulted in "
-            f"a FOIR of {current_foir:.2f}% (exceeding policy cap of 45%). "
-            f"Optimized counter-offer of ₹{best_candidate['amount']:,.0f} at {best_candidate['tenure']} months "
-            f"yields a sustainable projected FOIR of {best_candidate['foir']:.2f}%."
+            f"Requested loan of {_inr(requested_amount)} over {requested_tenure} months "
+            f"gives a FOIR of {current_foir:.2f}%, {breach}. "
+            f"A counter-offer of {_inr(best_candidate['amount'])} over "
+            f"{best_candidate['tenure']} months brings projected FOIR to "
+            f"{best_candidate['foir']:.2f}%."
         )
         return CounterOffer(
             recommended_amount=float(best_candidate["amount"]),

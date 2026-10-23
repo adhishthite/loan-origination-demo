@@ -158,6 +158,7 @@ export interface AuditLogEntry {
 
 export interface LoanApplication {
   id: string;
+  personaId?: string;
   status: ApplicationStatus;
   createdAt: string;
   updatedAt: string;

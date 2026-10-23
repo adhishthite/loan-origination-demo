@@ -8,11 +8,12 @@ import { SanctionKfsCard } from "./components/borrower/SanctionKfsCard";
 import { A2aInspectorModal } from "./components/shared/A2aInspectorModal";
 import { AuditTimeline } from "./components/shared/AuditTimeline";
 import { Header } from "./components/shared/Header";
-import { AdkPipelineGraph } from "./components/underwriter/AdkPipelineGraph";
+import { AgentTrace } from "./components/underwriter/AgentTrace";
 import { ApplicationList } from "./components/underwriter/ApplicationList";
 import { CounterOfferSim } from "./components/underwriter/CounterOfferSim";
 import { CreditMemoPanel } from "./components/underwriter/CreditMemoPanel";
 import { DecisionBar } from "./components/underwriter/DecisionBar";
+import { DecisionSummary } from "./components/underwriter/DecisionSummary";
 import { DocSpreadViewer } from "./components/underwriter/DocSpreadViewer";
 import { RuleScorecard } from "./components/underwriter/RuleScorecard";
 import type { DemoPersonaPreset, LoanApplication } from "./types/los";
@@ -59,8 +60,11 @@ export default function App() {
 
   const currentApplication =
     applications.find((a) => a.id === currentAppId) ||
+    applications.find((a) => a.personaId === activePersonaId) ||
     applications[0] ||
     MOCK_APPLICATIONS["app-grey-002"];
+  // Keep the demo-applicant picker in sync with whichever file is open.
+  const selectedPersonaId = currentApplication.personaId ?? activePersonaId;
 
   // Persona Switch Handler
   const handleSelectPersona = async (personaId: string) => {
@@ -149,61 +153,67 @@ export default function App() {
     );
   };
 
+  // Short, stable, human-readable file reference derived from the app id.
+  const fileRef = `LN-${(
+    [...currentApplication.id].reduce(
+      (h, c) => (h * 31 + c.charCodeAt(0)) >>> 0,
+      7,
+    ) % 1_000_000
+  )
+    .toString()
+    .padStart(6, "0")}`;
+
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors duration-200">
-      {/* Sticky Global Navigation */}
+    <div className="min-h-screen bg-paper text-ink">
       <Header
-        personas={personas}
-        activePersonaId={activePersonaId}
-        onSelectPersona={handleSelectPersona}
         activeView={activeView}
         onSelectView={setActiveView}
         onOpenA2aModal={() => setIsA2aModalOpen(true)}
         onOpenAuditDrawer={() => setIsAuditDrawerOpen(true)}
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
-        auditCount={currentApplication?.auditLog.length || 0}
+        auditCount={currentApplication?.auditLog?.length || 0}
+        fileRef={fileRef}
+        applicantName={currentApplication.applicant.fullName}
+        status={currentApplication.status}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        {/* VIEW 1: BORROWER PORTAL */}
+      <main className="mx-auto max-w-[1320px] px-4 py-6 sm:px-6">
         {activeView === "borrower" && (
           <div className="space-y-6">
-            {/* Quick Demo Persona Switcher */}
             <PersonaSelector
               personas={personas}
-              activePersonaId={activePersonaId}
+              activePersonaId={selectedPersonaId}
               onSelectPersona={handleSelectPersona}
             />
 
-            {/* ADK Pipeline Stepper */}
-            <PipelineStepper
-              status={currentApplication.status}
-              isEvaluating={isEvaluating}
-            />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+              <ApplicationForm
+                key={currentApplication.id}
+                application={currentApplication}
+                onUpdateApplication={handleUpdateApplication}
+                onSubmitForEvaluation={handleRunEvaluation}
+                isEvaluating={isEvaluating}
+              />
 
-            {/* Sanction Letter (KFS) or Adverse Notice */}
-            <SanctionKfsCard
-              application={currentApplication}
-              onAcceptOffer={handleAcceptOffer}
-              onSwitchToUnderwriter={() => setActiveView("underwriter")}
-            />
-
-            {/* Intake Form & Document Upload Simulator */}
-            <ApplicationForm
-              application={currentApplication}
-              onUpdateApplication={handleUpdateApplication}
-              onSubmitForEvaluation={handleRunEvaluation}
-              isEvaluating={isEvaluating}
-            />
+              <aside className="space-y-6 lg:sticky lg:top-20 lg:self-start">
+                <PipelineStepper
+                  status={currentApplication.status}
+                  isEvaluating={isEvaluating}
+                />
+                <SanctionKfsCard
+                  application={currentApplication}
+                  onAcceptOffer={handleAcceptOffer}
+                  onSwitchToUnderwriter={() => setActiveView("underwriter")}
+                />
+              </aside>
+            </div>
           </div>
         )}
 
-        {/* VIEW 2: UNDERWRITER WORKBENCH */}
         {activeView === "underwriter" && (
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
-            {/* Left: Pipeline List */}
-            <div className="xl:col-span-1">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+            <aside className="xl:sticky xl:top-20 xl:self-start">
               <ApplicationList
                 applications={applications}
                 selectedId={currentAppId}
@@ -212,53 +222,60 @@ export default function App() {
                   setCounterTerms(undefined);
                 }}
               />
-            </div>
+            </aside>
 
-            {/* Right: Detailed Underwriting Panels */}
-            <div className="space-y-6 xl:col-span-3">
-              {/* ADK Multi-Agent & A2A Topology Visualizer */}
-              <AdkPipelineGraph
-                steps={currentApplication.adkExecutionSteps}
-                a2aLatencyMs={
-                  currentApplication.a2aTelemetry[0]?.latencyMs || 210
-                }
-              />
-
-              {/* Document Extraction & KYC Spreading */}
-              <DocSpreadViewer
-                metrics={currentApplication.metrics}
-                extraction={currentApplication.documentExtraction}
-                kyc={currentApplication.kycVerification}
-                declaredIncome={
-                  currentApplication.applicant.declaredMonthlyIncome
-                }
-                declaredTaxId={currentApplication.applicant.taxId}
-              />
-
-              {/* Policy Rules Scorecard (POL-01..06) */}
-              <RuleScorecard rules={currentApplication.policyRules} />
-
-              {/* AI Credit Assessment Memo (CAM) */}
-              <CreditMemoPanel
-                cam={currentApplication.cam}
-                applicantName={currentApplication.applicant.fullName}
-              />
-
-              {/* Counter-Offer Simulator */}
-              <CounterOfferSim
-                application={currentApplication}
-                onApplySimulatedOffer={(amount, tenure) =>
-                  setCounterTerms({ amount, tenure })
-                }
-              />
-
-              {/* Human-in-the-Loop Decision Bar */}
-              <DecisionBar
+            <div className="min-w-0 space-y-6 pb-28">
+              <DecisionSummary
                 application={currentApplication}
                 counterTerms={counterTerms}
-                onDecision={handleDecision}
-                isSubmitting={isSubmittingDecision}
+                onRun={handleRunEvaluation}
+                isRunning={isEvaluating}
               />
+
+              {currentApplication.metrics && (
+                <>
+                  <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
+                    <RuleScorecard rules={currentApplication.policyRules} />
+                    <DocSpreadViewer
+                      metrics={currentApplication.metrics}
+                      extraction={currentApplication.documentExtraction}
+                      kyc={currentApplication.kycVerification}
+                      declaredIncome={
+                        currentApplication.applicant.declaredMonthlyIncome
+                      }
+                      declaredTaxId={currentApplication.applicant.taxId}
+                    />
+                  </div>
+
+                  <CounterOfferSim
+                    application={currentApplication}
+                    onApplySimulatedOffer={(amount, tenure) =>
+                      setCounterTerms({ amount, tenure })
+                    }
+                  />
+
+                  <CreditMemoPanel
+                    cam={currentApplication.cam}
+                    applicantName={currentApplication.applicant.fullName}
+                  />
+
+                  <AgentTrace
+                    runKey={`${currentApplication.id}-${currentApplication.updatedAt}`}
+                    hitlPaused={currentApplication.status === "MANUAL_REVIEW"}
+                    steps={currentApplication.adkExecutionSteps}
+                    a2aLatencyMs={
+                      currentApplication.a2aTelemetry?.[0]?.latencyMs || 210
+                    }
+                  />
+
+                  <DecisionBar
+                    application={currentApplication}
+                    counterTerms={counterTerms}
+                    onDecision={handleDecision}
+                    isSubmitting={isSubmittingDecision}
+                  />
+                </>
+              )}
             </div>
           </div>
         )}

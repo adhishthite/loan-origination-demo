@@ -40,7 +40,7 @@ async def test_a2a_agent_cards_and_rpc():
             json={
                 "jsonrpc": "2.0",
                 "method": "tasks/send",
-                "params": {"tax_id": "ABCDE1234F", "applicant_name": "Ananya Kulkarni"},
+                "params": {"tax_id": "ABCDE1234F", "applicant_name": "Priya Raghavan"},
                 "id": "test-1",
             },
         )

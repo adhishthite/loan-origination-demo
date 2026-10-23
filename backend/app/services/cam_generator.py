@@ -18,6 +18,7 @@ from app.models.domain import (
     RuleOutcome,
     UnderwritingMetrics,
 )
+from app.services.financial_calculator import _inr
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def generate_deterministic_cam(
         strengths.append("Flawless 24-month repayment record with 0 DPD delinquencies.")
     if metrics.average_monthly_balance >= (metrics.verified_monthly_income * 0.3):
         strengths.append(
-            f"Healthy banking liquidity with Average Monthly Balance (AMB) of ₹{metrics.average_monthly_balance:,.0f}."
+            f"Healthy banking liquidity with Average Monthly Balance (AMB) of {_inr(metrics.average_monthly_balance)}."
         )
 
     # Analyze risks
@@ -75,7 +76,7 @@ def generate_deterministic_cam(
     # Analyze mitigants
     if counter_offer:
         mitigants.append(
-            f"AI Counter-Offer structured: Reducing principal to ₹{counter_offer.recommended_amount:,.0f} "
+            f"AI Counter-Offer structured: Reducing principal to {_inr(counter_offer.recommended_amount)} "
             f"at {counter_offer.recommended_tenure_months} months moderates projected FOIR to {counter_offer.projected_foir:.2f}%."
         )
     if applicant.employment_type == "SALARIED" and metrics.inward_bounces_6m == 0:
@@ -101,12 +102,12 @@ def generate_deterministic_cam(
         if counter_offer:
             exec_summary = (
                 f"Application for {applicant.full_name} demonstrates good underlying creditworthiness "
-                f"(Bureau {metrics.bureau_score}), but requested loan of ₹{loan_request.amount:,.0f} "
+                f"(Bureau {metrics.bureau_score}), but requested loan of {_inr(loan_request.amount)} "
                 f"pushes FOIR to {metrics.foir_percentage:.2f}%. An automated Counter-Offer has been formulated."
             )
             recommendation = (
                 f"Recommended for Underwriter Approval with Counter-Offer: Sanction revised amount of "
-                f"₹{counter_offer.recommended_amount:,.0f} over {counter_offer.recommended_tenure_months} months "
+                f"{_inr(counter_offer.recommended_amount)} over {counter_offer.recommended_tenure_months} months "
                 f"at {metrics.annual_interest_rate_pct:.1f}% APR to ensure debt service sustainability (FOIR {counter_offer.projected_foir:.2f}%)."
             )
         else:
@@ -167,8 +168,8 @@ async def synthesize_credit_assessment_memo(
                 f"You are an enterprise Credit Assessment Memo (CAM) synthesizer agent for a bank.\n"
                 f"Synthesize an executive-ready Credit Assessment Memo for:\n"
                 f"Applicant: {applicant.full_name}, Age: {metrics.applicant_age_years}, "
-                f"Income: ₹{metrics.verified_monthly_income:,.0f}, Employment: {applicant.employment_type}.\n"
-                f"Loan Requested: ₹{loan_request.amount:,.0f} for {loan_request.tenure_months} months.\n"
+                f"Income: {_inr(metrics.verified_monthly_income)}, Employment: {applicant.employment_type}.\n"
+                f"Loan Requested: {_inr(loan_request.amount)} for {loan_request.tenure_months} months.\n"
                 f"Metrics: Bureau Score: {metrics.bureau_score}, FOIR: {metrics.foir_percentage:.2f}%, "
                 f"Bounces: {metrics.inward_bounces_6m}, 90+ DPD: {metrics.dpd_90_plus_24m}.\n"
                 f"Policy Rule Results:\n{rules_summary}\n"

@@ -126,7 +126,7 @@ To make this demo a flagship showcase for Google Cloud Financial Services (FSI),
   "application_id": "LOS-2026-88412",
   "status": "MANUAL_REVIEW",
   "applicant": {
-    "full_name": "Rohan Deshmukh",
+    "full_name": "Arjun Malhotra",
     "dob": "1991-04-15",
     "tax_id": "ABCDE1234F",
     "employment_type": "SALARIED",

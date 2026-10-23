@@ -9,6 +9,7 @@ from datetime import date
 
 from app.config import settings
 from app.models.domain import DocumentExtractionResult
+from app.services.financial_calculator import _inr
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ def get_fixture_extraction_for_persona(
     """Provides high-fidelity extraction fixtures matching the persona."""
     if persona_id == "persona_stp_clean" or "1234F" in declared_tax_id:
         return DocumentExtractionResult(
-            extracted_name="Ananya Kulkarni",
+            extracted_name="Priya Raghavan",
             extracted_dob=date(1994, 6, 12),
             extracted_tax_id="ABCDE1234F",
             id_confidence_score=0.99,
@@ -35,7 +36,7 @@ def get_fixture_extraction_for_persona(
         )
     elif persona_id == "persona_grey_counter" or "5678G" in declared_tax_id:
         return DocumentExtractionResult(
-            extracted_name="Rohan Deshmukh",
+            extracted_name="Arjun Malhotra",
             extracted_dob=date(1991, 4, 15),
             extracted_tax_id="ABCDE5678G",
             id_confidence_score=0.97,
@@ -47,7 +48,7 @@ def get_fixture_extraction_for_persona(
         )
     elif persona_id == "persona_reject_knockout" or "9012H" in declared_tax_id:
         return DocumentExtractionResult(
-            extracted_name="Vikramaditya Joshi",
+            extracted_name="Sourav Banerjee",
             extracted_dob=date(1985, 2, 10),
             extracted_tax_id="ABCDE9012H",
             id_confidence_score=0.94,
@@ -101,7 +102,7 @@ async def extract_document_intelligence(
             prompt = (
                 f"You are a loan document intelligence extraction agent.\n"
                 f"Applicant declared: Name='{declared_name}', DOB='{declared_dob}', "
-                f"PAN='{declared_tax_id}', Declared Income=₹{declared_income:,.0f}.\n"
+                f"PAN='{declared_tax_id}', Declared Income={_inr(declared_income)}.\n"
                 f"Document text summaries: {document_summaries or 'Standard KYC PAN and bank statement uploaded.'}\n"
                 f"Extract structured document attributes."
             )

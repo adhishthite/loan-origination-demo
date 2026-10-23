@@ -66,7 +66,7 @@ BUREAU_AGENT_CARD = {
 
 def query_bureau_database(tax_id: str) -> dict:
     """Simulated credit bureau repository returning data keyed by tax_id."""
-    # Ananya Kulkarni (Clean STP)
+    # Priya Raghavan (Clean STP)
     if "1234F" in tax_id:
         return {
             "bureau_score": 792,
@@ -77,7 +77,7 @@ def query_bureau_database(tax_id: str) -> dict:
             "watchlist_hit": False,
             "delinquent_accounts": [],
         }
-    # Rohan Deshmukh (Grey-Zone)
+    # Arjun Malhotra (Grey-Zone)
     elif "5678G" in tax_id:
         return {
             "bureau_score": 732,
@@ -88,7 +88,7 @@ def query_bureau_database(tax_id: str) -> dict:
             "watchlist_hit": False,
             "delinquent_accounts": [],
         }
-    # Vikramaditya Joshi (Knockout Reject)
+    # Sourav Banerjee (Knockout Reject)
     elif "9012H" in tax_id:
         return {
             "bureau_score": 615,

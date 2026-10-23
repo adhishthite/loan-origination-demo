@@ -1,11 +1,4 @@
-import {
-  AlertTriangle,
-  Bot,
-  CheckCircle,
-  Copy,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import type { CreditAssessmentMemo } from "../../types/los";
 
@@ -14,154 +7,97 @@ interface CreditMemoPanelProps {
   applicantName: string;
 }
 
+function MemoList({ title, items }: { title: string; items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div>
+      <h3 className="font-sans text-[13px] font-semibold text-ink">{title}</h3>
+      <ul className="mt-1 list-disc space-y-1 pl-5 marker:text-faint">
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function CreditMemoPanel({ cam, applicantName }: CreditMemoPanelProps) {
   const [copied, setCopied] = useState(false);
 
   if (!cam) {
     return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 text-center text-xs text-[var(--text-faint)]">
-        Credit Assessment Memo will be synthesized once the ADK agent completes
-        evaluation.
-      </div>
+      <section className="sheet" aria-label="Credit assessment memo">
+        <div className="px-5 pt-5 pb-3 sm:px-6">
+          <h2 className="section-title">Credit assessment memo</h2>
+        </div>
+        <p className="border-t border-rule px-5 py-6 text-[13px] text-graphite sm:px-6">
+          The memo is drafted by the agent after policy evaluation completes.
+        </p>
+      </section>
     );
   }
 
-  const handleCopy = () => {
-    const text = `CREDIT ASSESSMENT MEMO (CAM) - ${applicantName}
-Executive Summary:
+  const strengths = cam.strengths ?? [];
+  const risks = cam.riskFlags ?? [];
+  const mitigants = cam.mitigants ?? [];
+
+  const handleCopy = async () => {
+    const section = (t: string, xs: string[]) =>
+      xs.length ? `\n${t}\n${xs.map((x) => `- ${x}`).join("\n")}\n` : "";
+    const text = `Credit assessment memo: ${applicantName}
+
 ${cam.executiveSummary}
-
-Key Strengths:
-${cam.strengths.map((s) => `• ${s}`).join("\n")}
-
-Risk Flags:
-${cam.riskFlags.map((r) => `• ${r}`).join("\n")}
-
-Mitigants:
-${cam.mitigants.map((m) => `• ${m}`).join("\n")}
-
-Recommendation:
-${cam.recommendationJustification}`;
-
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+${section("Strengths", strengths)}${section("Risks", risks)}${section("Mitigants", mitigants)}
+Recommendation
+${cam.recommendationJustification}
+`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
   };
 
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 shadow-xs">
-      <div className="mb-4 flex flex-wrap items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-        <div className="flex items-center gap-2">
-          <Bot className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <h3 className="font-semibold text-sm text-[var(--text-primary)]">
-            AI Credit Assessment Memo (CAM)
-          </h3>
-          <span className="rounded bg-blue-500/10 px-1.5 py-0.5 font-mono text-[10px] text-blue-600 dark:text-blue-400">
-            Synthesized by cam_synthesizer_agent (Gemini 2.5 Flash)
-          </span>
+    <section className="sheet" aria-label="Credit assessment memo">
+      <div className="flex flex-wrap items-start justify-between gap-2 px-5 pt-5 pb-3 sm:px-6">
+        <div>
+          <h2 className="section-title">Credit assessment memo</h2>
+          <p className="text-[12px] text-graphite">
+            Drafted by <span className="font-mono">cam_synthesizer_agent</span>{" "}
+            with gemini-3.8-flash
+          </p>
         </div>
-
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-muted)] px-2.5 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]"
+          className="btn btn-ghost -mr-2 px-2.5 py-1.5"
         >
           {copied ? (
-            <>
-              <CheckCircle className="h-3 w-3 text-emerald-600" />
-              <span>Copied CAM</span>
-            </>
+            <Check aria-hidden className="h-4 w-4 text-approve" />
           ) : (
-            <>
-              <Copy className="h-3 w-3" />
-              <span>Copy Memo</span>
-            </>
+            <Copy aria-hidden className="h-4 w-4" />
           )}
+          <span aria-live="polite">{copied ? "Copied" : "Copy memo"}</span>
         </button>
       </div>
 
-      <div className="space-y-4 text-xs">
-        {/* Executive Summary */}
-        <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-muted)] p-3">
-          <div className="mb-1 font-semibold text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
-            Executive Summary
+      <div className="border-t border-rule">
+        <article className="max-w-[72ch] space-y-5 px-5 py-5 font-serif text-[15px] leading-[1.65] text-ink sm:px-6">
+          <p>{cam.executiveSummary}</p>
+          <MemoList title="Strengths" items={strengths} />
+          <MemoList title="Risks" items={risks} />
+          <MemoList title="Mitigants" items={mitigants} />
+          <div>
+            <h3 className="font-sans text-[13px] font-semibold text-ink">
+              Recommendation
+            </h3>
+            <p className="mt-1">{cam.recommendationJustification}</p>
           </div>
-          <p className="leading-relaxed text-[var(--text-primary)]">
-            {cam.executiveSummary}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* Strengths */}
-          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-            <div className="mb-2 flex items-center gap-1.5 font-semibold text-xs text-emerald-900 dark:text-emerald-300">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              <span>Underwriting Strengths (5 Cs)</span>
-            </div>
-            <ul className="space-y-1.5 text-[11px] text-[var(--text-primary)]">
-              {cam.strengths.map((str) => (
-                <li key={str} className="flex items-start gap-1.5">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                    •
-                  </span>
-                  <span>{str}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Risk Flags & Mitigants */}
-          <div className="space-y-3">
-            {cam.riskFlags.length > 0 && (
-              <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 p-3">
-                <div className="mb-2 flex items-center gap-1.5 font-semibold text-xs text-rose-900 dark:text-rose-300">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  <span>Identified Risk Flags</span>
-                </div>
-                <ul className="space-y-1 text-[11px] text-[var(--text-primary)]">
-                  {cam.riskFlags.map((risk) => (
-                    <li key={risk} className="flex items-start gap-1.5">
-                      <span className="text-rose-600 dark:text-rose-400 font-bold">
-                        •
-                      </span>
-                      <span>{risk}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {cam.mitigants.length > 0 && (
-              <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
-                <div className="mb-1 font-semibold text-xs text-blue-900 dark:text-blue-300">
-                  Compensating Factors & Mitigants
-                </div>
-                <ul className="space-y-1 text-[11px] text-[var(--text-primary)]">
-                  {cam.mitigants.map((mit) => (
-                    <li key={mit} className="flex items-start gap-1.5">
-                      <span className="text-blue-600 dark:text-blue-400 font-bold">
-                        •
-                      </span>
-                      <span>{mit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recommendation Justification */}
-        <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/5 p-3">
-          <div className="mb-1 flex items-center gap-1.5 font-semibold text-xs text-indigo-900 dark:text-indigo-300">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Senior Underwriting Recommendation & Justification</span>
-          </div>
-          <p className="text-[11px] leading-relaxed text-[var(--text-primary)]">
-            {cam.recommendationJustification}
-          </p>
-        </div>
+        </article>
       </div>
-    </div>
+    </section>
   );
 }

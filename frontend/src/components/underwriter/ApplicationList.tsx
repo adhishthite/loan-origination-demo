@@ -1,7 +1,37 @@
-import { CheckCircle2, Clock, Filter, Search, XCircle } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import type { ApplicationStatus, LoanApplication } from "../../types/los";
-import { formatDate, formatINRLakh, maskTaxId } from "../../utils/formatters";
+import { formatINRLakh, maskTaxId } from "../../utils/formatters";
+import { StatusPill } from "../shared/Header";
+
+type QueueFilter = "all" | "review" | "approved" | "declined";
+
+const FILTERS: { id: QueueFilter; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "review", label: "Review" },
+  { id: "approved", label: "Approved" },
+  { id: "declined", label: "Declined" },
+];
+
+const APPROVED: ApplicationStatus[] = [
+  "AUTO_APPROVED",
+  "APPROVED",
+  "OFFER_GENERATED",
+  "DISBURSED",
+];
+
+function matchesFilter(status: ApplicationStatus, f: QueueFilter): boolean {
+  switch (f) {
+    case "review":
+      return status === "MANUAL_REVIEW";
+    case "approved":
+      return APPROVED.includes(status);
+    case "declined":
+      return status === "REJECTED";
+    default:
+      return true;
+  }
+}
 
 interface ApplicationListProps {
   applications: LoanApplication[];
@@ -14,145 +44,113 @@ export function ApplicationList({
   selectedId,
   onSelect,
 }: ApplicationListProps) {
-  const [filter, setFilter] = useState<"ALL" | ApplicationStatus>("ALL");
+  const [filter, setFilter] = useState<QueueFilter>("all");
   const [search, setSearch] = useState("");
 
-  const filtered = applications.filter((app) => {
-    if (filter !== "ALL" && app.status !== filter) return false;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      return (
-        app.applicant.fullName.toLowerCase().includes(q) ||
-        app.applicant.taxId.toLowerCase().includes(q) ||
-        app.id.toLowerCase().includes(q)
-      );
-    }
-    return true;
+  const all = applications ?? [];
+  const q = search.trim().toLowerCase();
+  const filtered = all.filter((app) => {
+    if (!matchesFilter(app.status, filter)) return false;
+    if (!q) return true;
+    return (
+      (app.applicant?.fullName ?? "").toLowerCase().includes(q) ||
+      (app.applicant?.taxId ?? "").toLowerCase().includes(q)
+    );
   });
-
-  const getStatusBadge = (status: ApplicationStatus) => {
-    switch (status) {
-      case "AUTO_APPROVED":
-      case "APPROVED":
-      case "DISBURSED":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
-            <CheckCircle2 className="h-2.5 w-2.5" />
-            {status}
-          </span>
-        );
-      case "MANUAL_REVIEW":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
-            <Clock className="h-2.5 w-2.5" />
-            REVIEW
-          </span>
-        );
-      case "REJECTED":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:text-rose-400">
-            <XCircle className="h-2.5 w-2.5" />
-            REJECTED
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
-            {status}
-          </span>
-        );
-    }
-  };
+  const reviewCount = all.filter((a) => a.status === "MANUAL_REVIEW").length;
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-xs">
-      <div className="border-b border-[var(--border-subtle)] p-3">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--text-primary)]">
-            <Filter className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-            <span>Applications Pipeline</span>
-          </div>
-          <span className="rounded-full bg-[var(--bg-muted)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--text-muted)]">
-            {filtered.length} total
+    <section className="sheet" aria-label="Application queue">
+      <div className="space-y-3 p-4">
+        <div className="flex items-baseline justify-between">
+          <h2 className="section-title">Queue</h2>
+          <span className="text-[12px] text-graphite">
+            <span className="num">{reviewCount}</span> waiting on you
           </span>
         </div>
 
-        {/* Search */}
         <div className="relative">
-          <Search className="absolute top-2 left-2.5 h-3.5 w-3.5 text-[var(--text-faint)]" />
+          <Search
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-faint"
+          />
           <input
-            type="text"
-            placeholder="Search by name, PAN, ID..."
+            type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-muted)] py-1.5 pr-2 pl-8 text-xs text-[var(--text-primary)] placeholder-[var(--text-faint)] focus:border-blue-500 focus:outline-hidden"
+            placeholder="Search name or PAN"
+            aria-label="Search applications"
+            className="field pl-8 text-[13px]"
           />
         </div>
 
-        {/* Filter Pills */}
-        <div className="mt-2 flex flex-wrap gap-1">
-          {(["ALL", "MANUAL_REVIEW", "AUTO_APPROVED", "REJECTED"] as const).map(
-            (s) => (
+        <fieldset className="grid grid-cols-4 gap-0.5 rounded-md bg-sunken p-0.5">
+          <legend className="sr-only">Filter by status</legend>
+          {FILTERS.map((f) => {
+            const active = filter === f.id;
+            return (
               <button
-                key={s}
+                key={f.id}
                 type="button"
-                onClick={() => setFilter(s)}
-                className={`rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                  filter === s
-                    ? "bg-blue-600 text-white"
-                    : "bg-[var(--bg-muted)] text-[var(--text-muted)] hover:bg-[var(--border-subtle)]"
+                aria-pressed={active}
+                onClick={() => setFilter(f.id)}
+                className={`rounded-[5px] px-1 py-1 text-[12px] font-medium leading-tight transition-colors ${
+                  active
+                    ? "bg-sheet text-ink shadow-[0_0_0_1px_var(--rule)]"
+                    : "text-graphite hover:text-ink"
                 }`}
               >
-                {s === "ALL" ? "All" : s === "MANUAL_REVIEW" ? "Review" : s}
+                {f.label}
               </button>
-            ),
-          )}
-        </div>
+            );
+          })}
+        </fieldset>
       </div>
 
-      {/* List */}
-      <div className="flex-1 divide-y divide-[var(--border-subtle)] overflow-y-auto">
-        {filtered.map((app) => {
-          const isSelected = app.id === selectedId;
-
-          return (
-            <button
-              type="button"
-              key={app.id}
-              onClick={() => onSelect(app.id)}
-              className={`w-full text-left cursor-pointer p-3 transition-colors ${
-                isSelected
-                  ? "border-l-4 border-l-blue-600 bg-blue-50/50 dark:bg-blue-950/20"
-                  : "hover:bg-[var(--bg-muted)]"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-xs text-[var(--text-primary)]">
-                  {app.applicant.fullName}
-                </span>
-                {getStatusBadge(app.status)}
-              </div>
-
-              <div className="mt-1 flex items-center justify-between text-[11px]">
-                <span className="font-bold text-blue-600 dark:text-blue-400">
-                  {formatINRLakh(app.loanRequest.amount)}
-                </span>
-                <span className="text-[var(--text-faint)]">
-                  {app.loanRequest.tenureMonths}m •{" "}
-                  {app.applicant.employmentType}
-                </span>
-              </div>
-
-              <div className="mt-1 flex items-center justify-between text-[10px] text-[var(--text-faint)]">
-                <span className="font-mono">
-                  {maskTaxId(app.applicant.taxId)}
-                </span>
-                <span>{formatDate(app.createdAt)}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+      {filtered.length === 0 ? (
+        <p className="border-t border-rule px-4 py-6 text-center text-[13px] text-graphite">
+          No applications match. Clear the search or pick another filter.
+        </p>
+      ) : (
+        <ul className="border-t border-rule">
+          {filtered.map((app) => {
+            const selected = app.id === selectedId;
+            return (
+              <li key={app.id} className="border-b border-rule last:border-b-0">
+                <button
+                  type="button"
+                  onClick={() => onSelect(app.id)}
+                  aria-current={selected ? "true" : undefined}
+                  className={`relative block w-full px-4 py-3 text-left transition-colors ${
+                    selected ? "bg-sunken" : "hover:bg-sunken/60"
+                  }`}
+                >
+                  {selected && (
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-0 left-0 w-0.5 bg-ink"
+                    />
+                  )}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-[13px] font-medium text-ink">
+                      {app.applicant?.fullName ?? "Unnamed applicant"}
+                    </span>
+                    <span className="num shrink-0 text-[13px] text-ink">
+                      {formatINRLakh(app.loanRequest?.amount ?? 0)}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <span className="num text-[12px] text-faint">
+                      {maskTaxId(app.applicant?.taxId ?? "")}
+                    </span>
+                    <StatusPill status={app.status} />
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }

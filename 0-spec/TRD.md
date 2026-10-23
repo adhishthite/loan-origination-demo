@@ -491,7 +491,7 @@ All mathematical computations are executed in Python (`TRD-08`, `TRD-11`) and in
 
 5. **Counter-Offer Optimizer (`compute_counter_offer`):**
    - Triggered when `FOIR > 45.0%` and no hard Non-FOIR knockout exists.
-   - Solves for extended tenure (`48` or `60` months) and reduced principal (rounded to nearest `₹25,000`, e.g., `₹11,50,000` at `48` months yielding `47.2%` FOIR for the canonical `Rohan Deshmukh` persona) so that resulting $\text{FOIR} \le 48.0\%$.
+   - Solves for extended tenure (`48` or `60` months) and reduced principal (rounded to nearest `₹25,000`, e.g., `₹11,50,000` at `48` months yielding `47.2%` FOIR for the canonical `Arjun Malhotra` persona) so that resulting $\text{FOIR} \le 48.0\%$.
 
 ---
 
@@ -536,9 +536,9 @@ Implements the 6 baseline policy rules (`TRD-09`, `TRD-12`) with strict preceden
 
 | Persona ID | Applicant Name | Profile Summary | Key Metrics | Expected Routing Outcome |
 | :--- | :--- | :--- | :--- | :--- |
-| `persona_stp_clean` | **Ananya Kulkarni** (Salaried) | ₹8L Loan, 36m tenure, ₹1.45L verified monthly income | Age `32`, Bureau `792`, FOIR `24.1%`, `0` DPD, `0` Bounces, `0%` Income Variance | **`AUTO_APPROVED`** (STP `< 5s`, 10.5% APR, KFS generated immediately) |
-| `persona_grey_counter` | **Rohan Deshmukh** (Salaried — *BRD Canonical*) | ₹15L Loan, 36m tenure, ₹1.20L declared / ₹1.15L verified income | Age `35`, Bureau `732` (`MANUAL_REVIEW`), FOIR `58.95%` (`> 55%` cap), `0` DPD, `0` Bounces | **`MANUAL_REVIEW`** with AI Counter-Offer (`₹11.5L` @ `48m` -> Projected FOIR `47.2%`) |
-| `persona_reject_knockout` | **Vikramaditya Joshi** (Self-Employed SME) | ₹25L Loan, 24m tenure, ₹2.00L declared / ₹1.10L verified income | Age `41`, Bureau `615` (`< 680`), FOIR `132%`, `2` 90+ DPD, `3` Check Bounces, `45%` Variance | **`REJECTED`** (Multiple hard knockouts + Adverse Action Notice codes) |
+| `persona_stp_clean` | **Priya Raghavan** (Salaried) | ₹8L Loan, 36m tenure, ₹1.45L verified monthly income | Age `32`, Bureau `792`, FOIR `24.1%`, `0` DPD, `0` Bounces, `0%` Income Variance | **`AUTO_APPROVED`** (STP `< 5s`, 10.5% APR, KFS generated immediately) |
+| `persona_grey_counter` | **Arjun Malhotra** (Salaried — *BRD Canonical*) | ₹15L Loan, 36m tenure, ₹1.20L declared / ₹1.15L verified income | Age `35`, Bureau `732` (`MANUAL_REVIEW`), FOIR `58.95%` (`> 55%` cap), `0` DPD, `0` Bounces | **`MANUAL_REVIEW`** with AI Counter-Offer (`₹11.5L` @ `48m` -> Projected FOIR `47.2%`) |
+| `persona_reject_knockout` | **Sourav Banerjee** (Self-Employed SME) | ₹25L Loan, 24m tenure, ₹2.00L declared / ₹1.10L verified income | Age `41`, Bureau `615` (`< 680`), FOIR `132%`, `2` 90+ DPD, `3` Check Bounces, `45%` Variance | **`REJECTED`** (Multiple hard knockouts + Adverse Action Notice codes) |
 
 ---
 

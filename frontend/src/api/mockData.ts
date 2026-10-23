@@ -7,7 +7,7 @@ import type {
 export const DEMO_PERSONAS: DemoPersonaPreset[] = [
   {
     id: "persona_stp_clean",
-    name: "Ananya Kulkarni",
+    name: "Priya Raghavan",
     title: "Clean STP Auto-Approval",
     summary:
       "Senior Architect with pristine 792 CIBIL, low FOIR (24.1%), zero delinquencies. Full STP in < 5 seconds.",
@@ -15,13 +15,13 @@ export const DEMO_PERSONAS: DemoPersonaPreset[] = [
     badgeColor: "emerald",
     expectedOutcome: "AUTO_APPROVED",
     applicant: {
-      fullName: "Ananya Kulkarni",
+      fullName: "Priya Raghavan",
       dob: "1994-06-15",
       taxId: "ABCDE1234F",
       employmentType: "SALARIED",
       declaredMonthlyIncome: 145000,
       phone: "+91 98201 12345",
-      email: "ananya.kulkarni@techcorp.in",
+      email: "priya.raghavan@techcorp.in",
     },
     loanRequest: {
       amount: 800000,
@@ -31,7 +31,7 @@ export const DEMO_PERSONAS: DemoPersonaPreset[] = [
   },
   {
     id: "persona_grey_counter",
-    name: "Rohan Deshmukh",
+    name: "Arjun Malhotra",
     title: "Grey-Zone AI Counter-Offer",
     summary:
       "Canonical Case: High FOIR (58.95%) & Bureau 732 triggers Human Review. AI proposes counter-offer ₹11.5L @ 48m (47.2% FOIR).",
@@ -39,13 +39,13 @@ export const DEMO_PERSONAS: DemoPersonaPreset[] = [
     badgeColor: "amber",
     expectedOutcome: "MANUAL_REVIEW",
     applicant: {
-      fullName: "Rohan Deshmukh",
+      fullName: "Arjun Malhotra",
       dob: "1991-03-22",
       taxId: "BNKPD4321A",
       employmentType: "SALARIED",
       declaredMonthlyIncome: 120000,
       phone: "+91 98450 67890",
-      email: "rohan.deshmukh@finadvisors.in",
+      email: "arjun.malhotra@finadvisors.in",
     },
     loanRequest: {
       amount: 1500000,
@@ -55,7 +55,7 @@ export const DEMO_PERSONAS: DemoPersonaPreset[] = [
   },
   {
     id: "persona_reject_knockout",
-    name: "Vikramaditya Joshi",
+    name: "Sourav Banerjee",
     title: "Knockout Reject with Adverse Notice",
     summary:
       "SME Owner with subprime Bureau (615), 45% income discrepancy, 2x 90+ DPD delinquencies, and 3 bank bounces.",
@@ -63,13 +63,13 @@ export const DEMO_PERSONAS: DemoPersonaPreset[] = [
     badgeColor: "rose",
     expectedOutcome: "REJECTED",
     applicant: {
-      fullName: "Vikramaditya Joshi",
+      fullName: "Sourav Banerjee",
       dob: "1985-11-08",
       taxId: "CLKVJ8901Z",
       employmentType: "SELF_EMPLOYED",
       declaredMonthlyIncome: 200000,
       phone: "+91 97654 32109",
-      email: "vikram@joshienterprises.com",
+      email: "sourav@banerjeeenterprises.com",
     },
     loanRequest: {
       amount: 2500000,
@@ -93,7 +93,7 @@ export const MOCK_APPLICATIONS: Record<string, LoanApplication> = {
       salarySlip: true,
     },
     documentExtraction: {
-      extractedName: "Ananya Kulkarni",
+      extractedName: "Priya Raghavan",
       extractedDob: "1994-06-15",
       extractedTaxId: "ABCDE1234F",
       idConfidenceScore: 0.99,
@@ -289,7 +289,7 @@ export const MOCK_APPLICATIONS: Record<string, LoanApplication> = {
         previousStatus: null,
         newStatus: "DRAFT",
         policyVersion: "v2026.10.1",
-        details: { applicant: "Ananya Kulkarni", amount: 800000 },
+        details: { applicant: "Priya Raghavan", amount: 800000 },
       },
       {
         timestamp: new Date(Date.now() - 3570000).toISOString(),
@@ -333,7 +333,7 @@ export const MOCK_APPLICATIONS: Record<string, LoanApplication> = {
       salarySlip: true,
     },
     documentExtraction: {
-      extractedName: "Rohan S. Deshmukh",
+      extractedName: "Arjun S. Malhotra",
       extractedDob: "1991-03-22",
       extractedTaxId: "BNKPD4321A",
       idConfidenceScore: 0.96,
@@ -422,7 +422,7 @@ export const MOCK_APPLICATIONS: Record<string, LoanApplication> = {
     ],
     cam: {
       executiveSummary:
-        "Rohan Deshmukh is a credible borrower with clean debt repayment (0 DPD) and 732 bureau score. However, requested ₹15,00,000 for 36 months pushes proposed monthly EMI to ₹50,892, escalating FOIR to 59.9% (> 55% hard policy cap). ADK Policy Optimizer has synthesized a viable Counter-Offer at ₹11,50,000 for 48 months bringing FOIR down to 47.2%.",
+        "Arjun Malhotra is a credible borrower with clean debt repayment (0 DPD) and 732 bureau score. However, requested ₹15,00,000 for 36 months pushes proposed monthly EMI to ₹50,892, escalating FOIR to 59.9% (> 55% hard policy cap). ADK Policy Optimizer has synthesized a viable Counter-Offer at ₹11,50,000 for 48 months bringing FOIR down to 47.2%.",
       strengths: [
         "Impeccable zero 30+ DPD repayment track record across 4 active loan/card tradelines.",
         "Verified monthly net income ₹1,15,000 confirmed from 6 months bank statement.",
@@ -531,7 +531,7 @@ export const MOCK_APPLICATIONS: Record<string, LoanApplication> = {
         previousStatus: null,
         newStatus: "DRAFT",
         policyVersion: "v2026.10.1",
-        details: { applicant: "Rohan Deshmukh", amount: 1500000 },
+        details: { applicant: "Arjun Malhotra", amount: 1500000 },
       },
       {
         timestamp: new Date(Date.now() - 1770000).toISOString(),
@@ -570,7 +570,7 @@ export const MOCK_APPLICATIONS: Record<string, LoanApplication> = {
       salarySlip: false,
     },
     documentExtraction: {
-      extractedName: "Vikramaditya S. Joshi",
+      extractedName: "Sourav S. Banerjee",
       extractedDob: "1985-11-08",
       extractedTaxId: "CLKVJ8901Z",
       idConfidenceScore: 0.94,
@@ -757,7 +757,7 @@ export const MOCK_APPLICATIONS: Record<string, LoanApplication> = {
         previousStatus: null,
         newStatus: "DRAFT",
         policyVersion: "v2026.10.1",
-        details: { applicant: "Vikramaditya Joshi", amount: 2500000 },
+        details: { applicant: "Sourav Banerjee", amount: 2500000 },
       },
       {
         timestamp: new Date(Date.now() - 7140000).toISOString(),

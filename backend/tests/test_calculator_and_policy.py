@@ -86,7 +86,7 @@ class TestFinancialCalculator:
         assert kfs.total_amount_payable > kfs.sanctioned_amount
 
     def test_counter_offer_optimization(self):
-        # Rohan Deshmukh scenario:
+        # Arjun Malhotra scenario:
         # Requested 15L at 36m, bureau 732 (13.5% APR), existing EMI 18k, verified income 115k
         # FOIR exceeds 45%, optimizer should find viable parameters yielding FOIR <= 48%
         counter = compute_counter_offer(
@@ -145,7 +145,7 @@ class TestPolicyEngine:
         assert evaluate_rule_pol06_variance(30.0).outcome == RuleOutcome.AUTO_REJECT
 
     def test_stp_approval_precedence(self):
-        # Clean STP: Ananya Kulkarni metrics
+        # Clean STP: Priya Raghavan metrics
         clean_metrics = UnderwritingMetrics(
             applicant_age_years=32,
             bureau_score=792,
@@ -167,7 +167,7 @@ class TestPolicyEngine:
         assert all(r.outcome == RuleOutcome.AUTO_APPROVE for r in rules)
 
     def test_knockout_precedence(self):
-        # Multiple knockouts: Vikramaditya Joshi metrics
+        # Multiple knockouts: Sourav Banerjee metrics
         reject_metrics = UnderwritingMetrics(
             applicant_age_years=41,
             bureau_score=615,  # Knockout POL-02
@@ -190,7 +190,7 @@ class TestPolicyEngine:
         assert "ERR_INCOME_VARIANCE_CRITICAL" in adverse
 
     def test_counter_offer_precedence_exception(self):
-        # Rohan Deshmukh: sole breach is POL-03 (FOIR > 55%), but has viable Counter-Offer
+        # Arjun Malhotra: sole breach is POL-03 (FOIR > 55%), but has viable Counter-Offer
         grey_metrics = UnderwritingMetrics(
             applicant_age_years=35,
             bureau_score=732,  # Manual review (>=680)

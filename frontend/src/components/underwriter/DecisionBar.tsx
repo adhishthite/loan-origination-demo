@@ -1,19 +1,16 @@
-import {
-  CheckCircle,
-  FileSignature,
-  Loader2,
-  Sparkles,
-  XCircle,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { LoanApplication } from "../../types/los";
-import { formatINR } from "../../utils/formatters";
+import type { ApplicationStatus, LoanApplication } from "../../types/los";
+import { formatDateTime, formatINRLakh } from "../../utils/formatters";
+import { StatusPill } from "../shared/Header";
+
+type Decision = "APPROVE" | "APPROVE_COUNTER" | "REJECT";
 
 interface DecisionBarProps {
   application: LoanApplication;
   counterTerms?: { amount: number; tenure: number };
   onDecision: (
-    decision: "APPROVE" | "APPROVE_COUNTER" | "REJECT",
+    decision: Decision,
     notes: string,
     counterAmount?: number,
     counterTenure?: number,
@@ -21,145 +18,139 @@ interface DecisionBarProps {
   isSubmitting: boolean;
 }
 
+const FINAL: ApplicationStatus[] = [
+  "AUTO_APPROVED",
+  "APPROVED",
+  "OFFER_GENERATED",
+  "DISBURSED",
+  "REJECTED",
+];
+
 export function DecisionBar({
   application,
   counterTerms,
   onDecision,
   isSubmitting,
 }: DecisionBarProps) {
-  const defaultNotes =
-    application.status === "MANUAL_REVIEW"
-      ? "Approved counter-offer of ₹11.5L @ 48 months. Debt servicing brought to 42.7% FOIR, consistent with Credit Committee policy limits."
-      : "Application reviewed in accordance with standard FSI underwriting guidelines.";
+  const [notes, setNotes] = useState("");
+  const [pending, setPending] = useState<Decision | null>(null);
 
-  const [notes, setNotes] = useState(defaultNotes);
+  const counterAmount =
+    counterTerms?.amount ?? application.counterOffer?.recommendedAmount;
+  const counterTenure =
+    counterTerms?.tenure ?? application.counterOffer?.recommendedTenureMonths;
+  const hasCounter = counterAmount !== undefined && counterTenure !== undefined;
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset note per file
+  useEffect(() => {
+    setNotes("");
+  }, [application.id]);
 
   useEffect(() => {
     if (counterTerms) {
       setNotes(
-        `Approved restructuring to ${formatINR(counterTerms.amount)} over ${counterTerms.tenure} months to stabilize FOIR.`,
+        `Restructured to ${formatINRLakh(counterTerms.amount)} over ${counterTerms.tenure} months to bring FOIR within policy.`,
       );
     }
   }, [counterTerms]);
 
-  const isTerminal =
-    application.status === "AUTO_APPROVED" ||
-    application.status === "APPROVED" ||
-    application.status === "DISBURSED" ||
-    application.status === "REJECTED";
+  useEffect(() => {
+    if (!isSubmitting) setPending(null);
+  }, [isSubmitting]);
 
-  const effectiveCounterAmount =
-    counterTerms?.amount ||
-    application.counterOffer?.recommendedAmount ||
-    1150000;
-  const effectiveCounterTenure =
-    counterTerms?.tenure ||
-    application.counterOffer?.recommendedTenureMonths ||
-    48;
+  if (!application.metrics) return null;
 
-  if (isTerminal) {
+  if (FINAL.includes(application.status)) {
+    const last = [...(application.auditLog ?? [])]
+      .reverse()
+      .find((e) => e.newStatus === application.status);
     return (
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] p-4 text-center">
-        <span className="text-xs font-medium text-[var(--text-muted)]">
-          Underwriting decision concluded. Application status:{" "}
-          <span className="font-semibold text-[var(--text-primary)]">
-            {application.status}
-          </span>
+      <section
+        aria-label="Decision"
+        className="sheet sticky bottom-4 z-30 flex flex-wrap items-center gap-3 px-5 py-3 shadow-lg sm:px-6"
+      >
+        <span className="text-[13px] font-semibold text-ink">
+          Decision recorded
         </span>
-      </div>
+        <StatusPill status={application.status} />
+        {last && (
+          <span className="num text-[12px] text-graphite">
+            by {last.actor} on {formatDateTime(last.timestamp)}
+          </span>
+        )}
+      </section>
     );
   }
 
-  return (
-    <div className="rounded-xl border border-blue-500/20 bg-[var(--bg-card)] p-5 shadow-xs">
-      <div className="mb-3 flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
-        <div className="flex items-center gap-2">
-          <FileSignature className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <h3 className="font-semibold text-sm text-[var(--text-primary)]">
-            Credit Officer Review and Decision Gate
-          </h3>
-        </div>
-        <span className="rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
-          Human-in-the-loop review
-        </span>
-      </div>
+  const decide = (d: Decision) => {
+    setPending(d);
+    if (d === "APPROVE_COUNTER") {
+      onDecision(d, notes, counterAmount, counterTenure);
+    } else {
+      onDecision(d, notes);
+    }
+  };
 
-      <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="credit-officer-notes"
-            className="mb-1 block text-xs font-medium text-[var(--text-muted)]"
-          >
-            Officer Justification and Audit Memo
+  const spinner = (d: Decision) =>
+    isSubmitting && pending === d ? (
+      <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
+    ) : null;
+
+  return (
+    <section
+      aria-label="Decision"
+      className="sheet sticky bottom-4 z-30 px-4 py-3 shadow-lg sm:px-5"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+        <div className="min-w-0 flex-1">
+          <label htmlFor="officer-note" className="label">
+            Officer note for the audit trail
           </label>
-          <textarea
-            id="credit-officer-notes"
-            rows={2}
+          <input
+            id="officer-note"
+            type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Document officer review reason for immutable audit log..."
-            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-muted)] p-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-faint)] focus:border-blue-500 focus:outline-hidden"
+            placeholder="Why this decision"
+            className="field text-[13px]"
           />
         </div>
-
-        {/* Action Buttons in Active Voice */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Send Counter-Offer */}
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={() =>
-              onDecision(
-                "APPROVE_COUNTER",
-                notes,
-                effectiveCounterAmount,
-                effectiveCounterTenure,
-              )
-            }
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-2.5 font-semibold text-xs text-white shadow-xs transition-colors hover:bg-amber-700 disabled:opacity-50"
+            onClick={() => decide("REJECT")}
+            className="btn btn-secondary text-decline"
           >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Sparkles className="h-4 w-4" />
-            )}
-            <span>
-              Send Counter-Offer ({formatINR(effectiveCounterAmount)} @{" "}
-              {effectiveCounterTenure}m)
-            </span>
+            {spinner("REJECT")}
+            Decline application
           </button>
-
-          {/* Approve Requested Terms */}
+          {hasCounter && (
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => decide("APPROVE_COUNTER")}
+              className="btn btn-secondary"
+              title={`${formatINRLakh(counterAmount)} over ${counterTenure} months`}
+            >
+              {spinner("APPROVE_COUNTER")}
+              Send counter-offer
+              <span className="num font-normal text-graphite">
+                {formatINRLakh(counterAmount)}, {counterTenure} mo
+              </span>
+            </button>
+          )}
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={() => onDecision("APPROVE", notes)}
-            className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-xs text-white shadow-xs transition-colors hover:bg-emerald-700 disabled:opacity-50"
+            onClick={() => decide("APPROVE")}
+            className="btn btn-primary"
           >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <CheckCircle className="h-4 w-4" />
-            )}
-            <span>Approve Requested Terms</span>
-          </button>
-
-          {/* Decline Application */}
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={() => onDecision("REJECT", notes)}
-            className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 font-semibold text-xs text-rose-700 transition-colors hover:bg-rose-500/20 dark:text-rose-300 disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <XCircle className="h-4 w-4" />
-            )}
-            <span>Decline Application</span>
+            {spinner("APPROVE")}
+            Approve as requested
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
