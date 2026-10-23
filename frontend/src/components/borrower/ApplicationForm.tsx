@@ -190,7 +190,7 @@ export function ApplicationForm({
                       key={t}
                       className={`num flex-1 cursor-pointer rounded-[5px] py-1.5 text-center text-[13px] font-medium transition-colors has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-agent ${
                         selected
-                          ? "bg-ink text-sheet"
+                          ? "bg-brand text-white"
                           : "text-graphite hover:bg-sunken hover:text-ink"
                       }`}
                     >

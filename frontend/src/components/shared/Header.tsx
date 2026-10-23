@@ -1,4 +1,4 @@
-import { FileStack, History, Moon, Network, Sun } from "lucide-react";
+import { History, Moon, Network, Sun } from "lucide-react";
 import type { ApplicationStatus } from "../../types/los";
 
 interface HeaderProps {
@@ -55,8 +55,8 @@ export function Header({
       type="button"
       onClick={() => onSelectView(view)}
       aria-current={activeView === view ? "page" : undefined}
-      className={`relative h-14 px-1 text-[13px] font-medium transition-colors ${
-        activeView === view ? "text-ink" : "text-graphite hover:text-ink"
+      className={`display relative h-16 px-1 text-[14px] font-medium transition-colors ${
+        activeView === view ? "text-brand" : "text-ink hover:text-brand"
       }`}
     >
       {label}
@@ -67,13 +67,29 @@ export function Header({
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-rule bg-sheet">
-      <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-6 px-4 sm:px-6">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-ink text-sheet">
-            <FileStack className="h-4 w-4" />
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight text-ink">
+    <header className="sticky top-0 z-40 bg-sheet shadow-[0_1px_0_var(--rule)]">
+      <div className="bg-[#37393f] text-[12px] text-white/80">
+        <div className="mx-auto flex h-8 max-w-[1320px] items-center justify-between px-4 sm:px-6">
+          <span>Religare Finvest · SME loans</span>
+          <span className="hidden sm:inline">
+            Underwriting agents on Google Cloud · ADK, A2A, Gemini
+          </span>
+        </div>
+      </div>
+      <div className="mx-auto flex h-16 max-w-[1320px] items-center gap-8 px-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          <img
+            src="/religare-logo.svg"
+            alt="Religare SME Loans"
+            className="h-8 w-auto dark:hidden"
+          />
+          <img
+            src="/religare-logo-white.png"
+            alt="Religare Finvest"
+            className="hidden h-7 w-auto dark:block"
+          />
+          <span className="hidden h-6 w-px bg-rule sm:block" />
+          <span className="display hidden text-[15px] font-semibold text-ink sm:inline">
             Credit Desk
           </span>
         </div>

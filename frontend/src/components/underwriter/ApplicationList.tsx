@@ -128,7 +128,7 @@ export function ApplicationList({
                   {selected && (
                     <span
                       aria-hidden
-                      className="absolute inset-y-0 left-0 w-0.5 bg-ink"
+                      className="absolute inset-y-0 left-0 w-0.5 bg-brand"
                     />
                   )}
                   <div className="flex items-center justify-between gap-2">

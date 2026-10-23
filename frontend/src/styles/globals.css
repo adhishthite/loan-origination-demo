@@ -3,8 +3,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  /* Religare: Poppins for headings/buttons, Inter for body copy and data */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", "Inter", ui-sans-serif, sans-serif;
+  /* Religare uses no serif; the memo is set in Inter */
+  --font-serif: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Religare's UI is square-cornered; keep a hairline radius for pills */
+  --radius: 2px;
+  --radius-xs: 0px;
+  --radius-sm: 2px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --color-paper: var(--paper);
@@ -24,27 +35,37 @@
   --color-review-tint: var(--review-tint);
   --color-decline: var(--decline);
   --color-decline-tint: var(--decline-tint);
+  --color-brand: var(--brand);
+  --color-brand-tint: var(--brand-tint);
+  --color-marigold: var(--marigold);
+  --color-charcoal: var(--charcoal);
 }
 
 @layer base {
   :root {
-    --paper: #f3f5f8;
-    --sheet: #ffffff;
-    --sunken: #eef1f5;
-    --ink: #0f1b2d;
-    --graphite: #5b6676;
-    --faint: #8a94a3;
-    --rule: #dce1e7;
-    --rule-strong: #c3cad4;
+    /* Religare Finvest palette, sampled from religarefinvest.com */
+    --brand: #1f7140; /* Religare green: header bar, primary CTAs */
+    --brand-tint: #e6efc1; /* Religare lime highlight */
+    --marigold: #ffb342; /* Religare secondary CTA ("Know More") */
+    --charcoal: #37393f; /* top bar, footer, text on marigold */
 
-    --agent: #1f5fd6;
-    --agent-tint: #e8effc;
-    --approve: #1e7f4f;
-    --approve-tint: #e6f3ec;
-    --review: #b7791f;
-    --review-tint: #fbf1e1;
-    --decline: #b42318;
-    --decline-tint: #fbe9e7;
+    --paper: #f5f5f5;
+    --sheet: #ffffff;
+    --sunken: #f8f8f8;
+    --ink: #333333;
+    --graphite: #5f6166;
+    --faint: #7d7d7d;
+    --rule: #dddddd;
+    --rule-strong: #cccccc;
+
+    --agent: var(--brand);
+    --agent-tint: #e8f1ec;
+    --approve: var(--brand);
+    --approve-tint: var(--brand-tint);
+    --review: #8a5a00;
+    --review-tint: #fff1da;
+    --decline: #b3261e;
+    --decline-tint: #ffdede;
 
     /* Legacy aliases so untouched components keep rendering */
     --bg-page: var(--paper);
@@ -59,23 +80,28 @@
   }
 
   .dark {
-    --paper: #0d1420;
-    --sheet: #141d2b;
-    --sunken: #1a2535;
-    --ink: #e6ebf2;
-    --graphite: #a3aebd;
-    --faint: #6f7b8c;
-    --rule: #263244;
-    --rule-strong: #34425a;
+    --brand: #3fa66a;
+    --brand-tint: #22331d;
+    --marigold: #ffb342;
+    --charcoal: #e6e6e6;
 
-    --agent: #6f9cf0;
-    --agent-tint: #18264a;
-    --approve: #4fbf86;
-    --approve-tint: #12301f;
-    --review: #e0a54a;
-    --review-tint: #33260f;
-    --decline: #f0766a;
-    --decline-tint: #3a1714;
+    --paper: #1a1b1f;
+    --sheet: #222429;
+    --sunken: #2a2c32;
+    --ink: #ececec;
+    --graphite: #b4b6bb;
+    --faint: #8b8d93;
+    --rule: #37393f;
+    --rule-strong: #4a4d55;
+
+    --agent: var(--brand);
+    --agent-tint: #1d2f24;
+    --approve: #6cc48f;
+    --approve-tint: #22331d;
+    --review: #ffb342;
+    --review-tint: #3a2b12;
+    --decline: #ff8a80;
+    --decline-tint: #3d1d1b;
   }
 
   html {
@@ -92,7 +118,16 @@
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    font-feature-settings: "ss01";
+    font-feature-settings: "cv11";
+  }
+
+  h1,
+  h2,
+  h3,
+  .section-title,
+  .btn,
+  .display {
+    font-family: var(--font-display);
   }
 
   :focus-visible {
@@ -102,7 +137,7 @@
   }
 
   input[type="range"] {
-    accent-color: var(--ink);
+    accent-color: var(--brand);
   }
 }
 
@@ -115,7 +150,7 @@
   .sheet {
     background: var(--sheet);
     border: 1px solid var(--rule);
-    border-radius: 0.5rem;
+    border-radius: 0;
   }
 
   .section-title {
@@ -129,7 +164,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    border-radius: 9999px;
+    border-radius: 2px;
     padding: 0.125rem 0.5rem;
     font-size: 12px;
     font-weight: 600;
@@ -162,8 +197,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 0.375rem;
-    padding: 0.5rem 0.875rem;
+    border-radius: 0;
+    padding: 0.5625rem 1rem;
     font-size: 13px;
     font-weight: 600;
     transition:
@@ -176,11 +211,18 @@
     cursor: not-allowed;
   }
   .btn-primary {
-    background: var(--ink);
-    color: var(--sheet);
+    background: var(--brand);
+    color: #fff;
   }
   .btn-primary:hover:not(:disabled) {
-    background: color-mix(in oklab, var(--ink) 85%, var(--agent));
+    background: color-mix(in oklab, var(--brand) 85%, black);
+  }
+  .btn-accent {
+    background: var(--marigold);
+    color: #37393f;
+  }
+  .btn-accent:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--marigold) 88%, black);
   }
   .btn-agent {
     background: var(--agent);
@@ -207,7 +249,7 @@
 
   .field {
     width: 100%;
-    border-radius: 0.375rem;
+    border-radius: 0;
     border: 1px solid var(--rule);
     background: var(--sheet);
     padding: 0.5rem 0.75rem;

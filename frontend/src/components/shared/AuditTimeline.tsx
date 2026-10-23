@@ -129,7 +129,7 @@ export function AuditTimeline({
         aria-label="Close audit trail"
         tabIndex={-1}
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-ink/30"
+        className="absolute inset-0 cursor-default bg-charcoal/40"
       />
       <div
         ref={panelRef}

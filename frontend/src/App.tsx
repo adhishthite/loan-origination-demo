@@ -196,7 +196,7 @@ export default function App() {
                 isEvaluating={isEvaluating}
               />
 
-              <aside className="space-y-6 lg:sticky lg:top-20 lg:self-start">
+              <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
                 <PipelineStepper
                   status={currentApplication.status}
                   isEvaluating={isEvaluating}
@@ -213,7 +213,7 @@ export default function App() {
 
         {activeView === "underwriter" && (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-            <aside className="xl:sticky xl:top-20 xl:self-start">
+            <aside className="xl:sticky xl:top-28 xl:self-start">
               <ApplicationList
                 applications={applications}
                 selectedId={currentAppId}

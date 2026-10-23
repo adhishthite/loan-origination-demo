@@ -232,7 +232,7 @@ export function A2aInspectorModal({
         aria-label="Close agents"
         tabIndex={-1}
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-ink/40"
+        className="absolute inset-0 cursor-default bg-charcoal/50"
       />
       <div
         ref={panelRef}
@@ -283,7 +283,7 @@ export function A2aInspectorModal({
                   </span>
                 )}
                 {selected && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-ink" />
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-brand" />
                 )}
               </button>
             );
@@ -379,7 +379,7 @@ export function A2aInspectorModal({
                       key={opt.key}
                       className={`cursor-pointer rounded-[5px] px-3 py-1.5 text-[13px] font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-agent ${
                         selected
-                          ? "bg-ink text-sheet"
+                          ? "bg-brand text-white"
                           : "text-graphite hover:bg-sunken hover:text-ink"
                       }`}
                     >
